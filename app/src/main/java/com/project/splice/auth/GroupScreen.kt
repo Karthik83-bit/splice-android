@@ -1,6 +1,5 @@
 package com.project.splice.auth
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,21 +7,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,23 +21,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.splice.R
+import com.project.splice.ui.components.*
 
 // ─── Color Tokens ─────────────────────────────────────────────────────────────
 private val BgPrimary       = Color(0xFF111111)
 private val BgCard          = Color(0xFF1C1C1C)
 private val BgCardLight     = Color(0xFFE8EDE0)   // cream "owed" card
 private val BgChip          = Color(0xFF2A2A2A)
-private val AccentRed       = Color(0xFFE05252)
 private val AccentGreen     = Color(0xFF6EBF8B)
 private val TextPrimary     = Color(0xFFFFFFFF)
 private val TextSecondary   = Color(0xFF8A8A8A)
-private val TextMuted       = Color(0xFF444444)
 private val TextDark        = Color(0xFF111111)
 private val SettledBg       = Color(0xFF2A3A2A)
 private val SettledText     = Color(0xFF6EBF8B)
 private val PendingText     = Color(0xFFE05252)
-private val NavBg           = Color(0xFF1A1A1A)
-private val PositiveGreen   = Color(0xFF4CAF50)
 
 // ─── Data Models ──────────────────────────────────────────────────────────────
 data class GroupMember(
@@ -58,8 +46,6 @@ data class GroupMember(
 )
 
 enum class MemberStatus { SETTLED, PENDING }
-
-data class BottomNavItem(val label: String, val icon: Int, val selectedIcon: Int)
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 @Composable
@@ -79,10 +65,22 @@ fun EuropeTripDetailScreen(
         GroupMember("Yuki Tanaka",   MemberStatus.SETTLED,  "",       "€4,509.00", "Paid 32%"),
     )
 
+    val navItems = listOf(
+        SpliceNavItem("Home", R.drawable.ic_wallet, R.drawable.ic_wallet),
+        SpliceNavItem("Groups", R.drawable.ic_wallet, R.drawable.ic_wallet),
+        SpliceNavItem("AI\nAssistant", R.drawable.ic_wallet, R.drawable.ic_wallet),
+        SpliceNavItem("Analytics", R.drawable.ic_wallet, R.drawable.ic_wallet),
+        SpliceNavItem("Profile", R.drawable.ic_wallet, R.drawable.ic_wallet),
+    )
+
     Scaffold(
         containerColor = BgPrimary,
         bottomBar = {
-            GroupBottomNav(selected = selectedNav, onSelect = { selectedNav = it; onNavSelect(it) })
+            SpliceBottomNav(
+                selected = selectedNav,
+                onSelect = { selectedNav = it; onNavSelect(it) },
+                items = navItems
+            )
         },
     ) { innerPadding ->
         LazyColumn(
@@ -94,7 +92,10 @@ fun EuropeTripDetailScreen(
 
             // ── Top Bar ───────────────────────────────────────────────────
             item {
-                TripTopBar(onBack = onBack)
+                SpliceTopBar(
+                    title = "Europe Trip\n2024",
+                    onBackClick = onBack
+                )
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -115,7 +116,11 @@ fun EuropeTripDetailScreen(
 
             // ── Group Members ─────────────────────────────────────────────
             item {
-                SectionHeader(title = "Group Members", actionLabel = "Manage Members", onAction = onManageMembers)
+                SectionHeader(
+                    title = "Group Members",
+                    actionLabel = "Manage Members",
+                    onAction = onManageMembers
+                )
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -143,46 +148,6 @@ fun EuropeTripDetailScreen(
                 AiInsightsSection()
                 Spacer(Modifier.height(16.dp))
             }
-        }
-    }
-}
-
-// ─── Top Bar ──────────────────────────────────────────────────────────────────
-@Composable
-private fun TripTopBar(onBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
-            Icon(painter = painterResource(R.drawable.ic_wallet), contentDescription = "Back", tint = TextPrimary)
-        }
-        Spacer(Modifier.width(8.dp))
-        Text(
-            "Europe Trip\n2024",
-            color = TextPrimary,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Black,
-            lineHeight = 26.sp,
-            modifier = Modifier.weight(1f),
-        )
-        // Avatar
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF2A2A2A))
-                .border(1.5.dp, Color(0xFF3A3A3A), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(painter = painterResource(R.drawable.ic_wallet), contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
-        }
-        Spacer(Modifier.width(10.dp))
-        IconButton(onClick = {}, modifier = Modifier.size(36.dp)) {
-            Icon(painter = painterResource(R.drawable.ic_wallet), contentDescription = "Notifications", tint = TextPrimary)
         }
     }
 }
@@ -215,7 +180,6 @@ private fun TotalSpendCard() {
         )
         Spacer(Modifier.height(14.dp))
 
-        // AI Savings chip
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(50.dp))
@@ -230,7 +194,6 @@ private fun TotalSpendCard() {
 
         Spacer(Modifier.height(8.dp))
 
-        // Days remaining chip
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(50.dp))
@@ -257,7 +220,6 @@ private fun SmartSimplificationCard(enabled: Boolean, onToggle: (Boolean) -> Uni
             .padding(20.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Sparkle / AI icon
             Icon(
                 painter = painterResource(R.drawable.ic_wallet),
                 contentDescription = null,
@@ -265,15 +227,13 @@ private fun SmartSimplificationCard(enabled: Boolean, onToggle: (Boolean) -> Uni
                 modifier = Modifier.size(22.dp),
             )
             Spacer(Modifier.weight(1f))
-            Switch(
+            SpliceSwitch(
                 checked = enabled,
                 onCheckedChange = onToggle,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = TextPrimary,
-                    checkedTrackColor = Color(0xFF3A3A3A),
-                    uncheckedThumbColor = TextSecondary,
-                    uncheckedTrackColor = Color(0xFF2A2A2A),
-                ),
+                checkedThumbColor = TextPrimary,
+                checkedTrackColor = Color(0xFF3A3A3A),
+                uncheckedThumbColor = TextSecondary,
+                uncheckedTrackColor = Color(0xFF2A2A2A),
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -292,26 +252,6 @@ private fun SmartSimplificationCard(enabled: Boolean, onToggle: (Boolean) -> Uni
     }
 }
 
-// ─── Section Header ───────────────────────────────────────────────────────────
-@Composable
-private fun SectionHeader(title: String, actionLabel: String, onAction: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(title, color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Text(
-            actionLabel,
-            color = TextSecondary,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.clickable { onAction() },
-        )
-    }
-}
-
 // ─── Member Row ───────────────────────────────────────────────────────────────
 @Composable
 private fun MemberRow(member: GroupMember) {
@@ -321,7 +261,6 @@ private fun MemberRow(member: GroupMember) {
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Avatar
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -334,7 +273,6 @@ private fun MemberRow(member: GroupMember) {
 
         Spacer(Modifier.width(14.dp))
 
-        // Name + status
         Column(modifier = Modifier.weight(1f)) {
             Text(member.name, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
@@ -358,7 +296,6 @@ private fun MemberRow(member: GroupMember) {
             }
         }
 
-        // Amount + percentage
         Column(horizontalAlignment = Alignment.End) {
             Text(member.totalAmount, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(2.dp))
@@ -376,13 +313,11 @@ private fun NextStopCard() {
             .padding(horizontal = 20.dp)
             .height(160.dp)
             .clip(RoundedCornerShape(20.dp))
-            // Simulate dark atmospheric image with a gradient background
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Color(0xFF1A1208), Color(0xFF3D2B0A), Color(0xFF1A1208)),
                 )
             )
-            // Overlay gradient for text readability
             .drawWithContent {
                 drawContent()
                 drawRect(
@@ -393,7 +328,6 @@ private fun NextStopCard() {
                 )
             },
     ) {
-        // Avg/day badge — top right
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -405,7 +339,6 @@ private fun NextStopCard() {
             Text("€152.00 avg/day", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
 
-        // Next stop label — bottom left
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -446,21 +379,15 @@ private fun YouAreOwedCard(onSettleUp: () -> Unit) {
         )
         Spacer(Modifier.height(20.dp))
 
-        Button(
+        SpliceButton(
+            text = "Settle Up",
             onClick = onSettleUp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1E2618),
-                contentColor = TextPrimary,
-            ),
-        ) {
-            Icon(painter = painterResource(R.drawable.ic_wallet), contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(10.dp))
-            Text("Settle Up", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        }
+            containerColor = Color(0xFF1E2618),
+            contentColor = TextPrimary,
+            icon = R.drawable.ic_wallet,
+            height = 52,
+            shapeRadius = 14
+        )
 
         Spacer(Modifier.height(12.dp))
         Text(
@@ -506,63 +433,6 @@ private fun AiInsightsSection() {
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(insight, color = TextSecondary, fontSize = 14.sp, lineHeight = 21.sp)
-            }
-        }
-    }
-}
-
-// ─── Bottom Navigation ────────────────────────────────────────────────────────
-@Composable
-private fun GroupBottomNav(selected: Int, onSelect: (Int) -> Unit) {
-    val items = listOf(
-        BottomNavItem("Home",          R.drawable.ic_wallet,R.drawable.ic_wallet,      ),
-        BottomNavItem("Groups",        R.drawable.ic_wallet,R.drawable.ic_wallet,     ),
-        BottomNavItem("AI\nAssistant", R.drawable.ic_wallet,R.drawable.ic_wallet,),
-        BottomNavItem("Analytics",     R.drawable.ic_wallet,R.drawable.ic_wallet, ),
-        BottomNavItem("Profile",       R.drawable.ic_wallet,R.drawable.ic_wallet,   ),
-    )
-
-    Surface(color = NavBg, tonalElevation = 0.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .height(64.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            items.forEachIndexed { index, item ->
-                val isSelected = selected == index
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onSelect(index) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF2A2A2A)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(painter = painterResource(item.selectedIcon), contentDescription = item.label, tint = Color.White, modifier = Modifier.size(22.dp))
-                        }
-                    } else {
-                        Icon(painter = painterResource(item.icon), contentDescription = item.label, tint = Color(0xFF555555), modifier = Modifier.size(22.dp))
-                    }
-                    Spacer(Modifier.height(3.dp))
-                    Text(
-                        item.label,
-                        color = if (isSelected) Color.White else Color(0xFF555555),
-                        fontSize = 10.sp,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 12.sp,
-                    )
-                }
             }
         }
     }

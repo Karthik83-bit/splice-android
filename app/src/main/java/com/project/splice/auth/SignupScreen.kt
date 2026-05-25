@@ -37,16 +37,19 @@ private val TextSecondary   = Color(0xFF8A8A8A)
 private val TextMuted       = Color(0xFF5A5A5A)
 private val DividerColor    = Color(0xFF2E2E2E)
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
 @Composable
-fun LoginScreen(
+fun SignupScreen(
     navController: NavHostController,
+    viewModel: SignupViewModel = hiltViewModel(),
     onContinueWithGoogle: () -> Unit = {},
     onTermsClick: () -> Unit = {},
     onPrivacyClick: () -> Unit = {},
 ) {
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    
+    val state by viewModel.state
 
     Box(
         modifier = Modifier
@@ -84,7 +87,7 @@ fun LoginScreen(
 
             // ── Title ─────────────────────────────────────────────────────
             Text(
-                text = "Welcome Back",
+                text = "Create Account",
                 color = TextPrimary,
                 fontSize = 42.sp,
                 fontWeight = FontWeight.Black,
@@ -97,7 +100,7 @@ fun LoginScreen(
 
             // ── Subtitle ──────────────────────────────────────────────────
             Text(
-                text = "Sign in to continue your journey with Lumina and manage your splits effortlessly.",
+                text = "Join Lumina and start splitting expenses smarter with your friends and family.",
                 color = TextSecondary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Normal,
@@ -107,66 +110,27 @@ fun LoginScreen(
 
             Spacer(Modifier.weight(1f))
 
-            // ── Google Button ─────────────────────────────────────────────
-            OutlinedButton(
-                onClick = onContinueWithGoogle,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = SurfaceDark,
-                    contentColor = TextPrimary,
-                ),
-                border = BorderStroke(1.dp, OutlineColor),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_google),
-                        contentDescription = "Google logo",
-                        tint = TextPrimary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "Continue with Google",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = TextPrimary,
-                    )
-                }
+            if (state.isLoading) {
+                CircularProgressIndicator(color = TextPrimary)
+                Spacer(Modifier.height(16.dp))
             }
 
-            Spacer(Modifier.height(24.dp))
-
-            // ── OR Divider ────────────────────────────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = DividerColor,
-                    thickness = 1.dp,
-                )
-                Text(
-                    text = "  OR  ",
-                    color = TextMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 1.sp,
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = DividerColor,
-                    thickness = 1.dp,
-                )
+            state.error?.let {
+                Text(text = it, color = Color.Red, fontSize = 14.sp)
+                Spacer(Modifier.height(16.dp))
             }
 
-            Spacer(Modifier.height(24.dp))
+            // ── Name Input ───────────────────────────────────────────────
+            SpliceTextField(
+                value = name,
+                onValueChange = { name = it },
+                placeholder = "Full Name",
+                containerColor = SurfaceDark,
+                unfocusedBorderColor = OutlineColor,
+                focusedBorderColor = Color(0xFF444444)
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             // ── Email Input ───────────────────────────────────────────────
             SpliceTextField(
@@ -191,22 +155,33 @@ fun LoginScreen(
                 focusedBorderColor = Color(0xFF444444)
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // ── Sign In Button ───────────────────────────────────────────
+            // ── Sign Up Button ───────────────────────────────────────────
             SpliceButton(
-                text = "Sign In",
+                text = "Create Account",
                 onClick = {
-                    navController.navigate(Screens.HomeScreen)
+                    viewModel.onSignup(
+                        email = email,
+                        password = password,
+                        name = name,
+                        photoUrl = ""
+                    )
                 }
             )
 
+            LaunchedEffect(state.user) {
+                if (state.user != null) {
+                    navController.navigate(Screens.HomeScreen)
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
 
-            // ── Go to Sign Up ──────────────────────────────────────────────
-            TextButton(onClick = { navController.navigate(Screens.SignupScreen) }) {
+            // ── Go to Login ──────────────────────────────────────────────
+            TextButton(onClick = { navController.navigate(Screens.LoginScreen) }) {
                 Text(
-                    text = "Don't have an account? Sign Up",
+                    text = "Already have an account? Sign In",
                     color = TextSecondary,
                     fontSize = 14.sp
                 )
